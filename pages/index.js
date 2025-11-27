@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X } from 'lucide-react';
+import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -13,7 +13,9 @@ export default function Home() {
     redactPHI: true,
     flagPrivilege: true,
     flagConfidentiality: true,
-    useAI: false
+    useAI: false,
+    generateHIPAA: false,
+    exportPDF: false
   });
 
   const handleFileChange = (e) => {
@@ -74,6 +76,35 @@ export default function Home() {
       case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       case 'low': return 'text-green-600 bg-green-50 border-green-200';
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const downloadPDF = (base64Data, filename) => {
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const getComplianceGradeColor = (grade) => {
+    switch (grade) {
+      case 'A': return 'text-green-600 bg-green-100';
+      case 'B': return 'text-blue-600 bg-blue-100';
+      case 'C': return 'text-yellow-600 bg-yellow-100';
+      case 'D': return 'text-orange-600 bg-orange-100';
+      case 'F': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -212,6 +243,28 @@ export default function Home() {
                     <span className="font-medium">Enable AI Analysis</span>
                     <span className="text-xs text-gray-500">(Azure OpenAI)</span>
                   </label>
+                  <div className="grid grid-cols-2 gap-3 border-t pt-3 mt-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={options.generateHIPAA}
+                        onChange={(e) => setOptions({ ...options, generateHIPAA: e.target.checked })}
+                        className="rounded text-green-600"
+                      />
+                      <Heart className="h-4 w-4 text-green-600" />
+                      <span>HIPAA Report</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={options.exportPDF}
+                        onChange={(e) => setOptions({ ...options, exportPDF: e.target.checked })}
+                        className="rounded text-purple-600"
+                      />
+                      <Download className="h-4 w-4 text-purple-600" />
+                      <span>Export PDF</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Error Display */}
@@ -267,6 +320,30 @@ export default function Home() {
                       <div className="text-xs text-gray-600">Processing Time</div>
                     </div>
                   </div>
+
+                  {/* Download Buttons */}
+                  {(result.redactedPDF || result.hipaaReportPDF) && (
+                    <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+                      {result.redactedPDF && (
+                        <button
+                          onClick={() => downloadPDF(result.redactedPDF, 'redacted-document.pdf')}
+                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download Redacted PDF
+                        </button>
+                      )}
+                      {result.hipaaReportPDF && (
+                        <button
+                          onClick={() => downloadPDF(result.hipaaReportPDF, 'hipaa-compliance-report.pdf')}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                        >
+                          <ClipboardCheck className="h-4 w-4" />
+                          Download HIPAA Report
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Redacted Text */}
@@ -306,10 +383,104 @@ export default function Home() {
                             <span className="font-medium">{flag.type}</span>
                             <span className="text-xs uppercase">{flag.severity}</span>
                           </div>
-                          <p className="text-sm mt-1 opacity-80">{flag.description || flag.match}</p>
+                          <p className="text-sm mt-1 opacity-80">{flag.reason || flag.description || flag.match}</p>
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* HIPAA Compliance Report */}
+                {result.hipaaReport && !result.hipaaReport.error && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Heart className="h-5 w-5 text-green-600" />
+                      HIPAA Compliance Report
+                    </h2>
+
+                    {/* Compliance Score */}
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className={`text-4xl font-bold px-4 py-2 rounded-lg ${getComplianceGradeColor(result.hipaaReport.complianceScore?.grade)}`}>
+                        {result.hipaaReport.complianceScore?.grade || 'N/A'}
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold">{result.hipaaReport.complianceScore?.score || 0}/100</div>
+                        <div className="text-sm text-gray-600">{result.hipaaReport.complianceScore?.interpretation}</div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                      <div className="text-center p-2 bg-gray-50 rounded">
+                        <div className="text-lg font-bold">{result.hipaaReport.summary?.totalPHIIdentifiersFound || 0}</div>
+                        <div className="text-xs text-gray-500">PHI Found</div>
+                      </div>
+                      <div className="text-center p-2 bg-red-50 rounded">
+                        <div className="text-lg font-bold text-red-600">{result.hipaaReport.summary?.criticalFindings || 0}</div>
+                        <div className="text-xs text-gray-500">Critical</div>
+                      </div>
+                      <div className="text-center p-2 bg-orange-50 rounded">
+                        <div className="text-lg font-bold text-orange-600">{result.hipaaReport.summary?.highFindings || 0}</div>
+                        <div className="text-xs text-gray-500">High</div>
+                      </div>
+                      <div className="text-center p-2 bg-blue-50 rounded">
+                        <div className="text-lg font-bold text-blue-600">{result.hipaaReport.summary?.categoriesAffected || 0}</div>
+                        <div className="text-xs text-gray-500">Categories</div>
+                      </div>
+                    </div>
+
+                    {/* PHI Categories Found */}
+                    {result.hipaaReport.phiFindings && Object.keys(result.hipaaReport.phiFindings).length > 0 && (
+                      <div className="mb-4">
+                        <h3 className="font-medium mb-2 text-sm">PHI Categories Detected:</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(result.hipaaReport.phiFindings).map(([category, finding]) => (
+                            <span
+                              key={category}
+                              className={`px-2 py-1 rounded text-xs font-medium ${
+                                finding.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                                finding.severity === 'HIGH' ? 'bg-orange-100 text-orange-700' :
+                                'bg-yellow-100 text-yellow-700'
+                              }`}
+                            >
+                              {finding.label} ({finding.count})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Recommendations */}
+                    {result.hipaaReport.recommendations?.length > 0 && (
+                      <div>
+                        <h3 className="font-medium mb-2 text-sm">Top Recommendations:</h3>
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {result.hipaaReport.recommendations.slice(0, 3).map((rec, index) => (
+                            <div key={index} className="p-2 bg-gray-50 rounded text-sm">
+                              <span className={`font-medium ${
+                                rec.priority === 'CRITICAL' ? 'text-red-600' :
+                                rec.priority === 'HIGH' ? 'text-orange-600' : 'text-blue-600'
+                              }`}>[{rec.priority}]</span>
+                              {' '}{rec.action}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* HIPAA Quick Check (if no full report) */}
+                {result.hipaaQuickCheck && !result.hipaaReport && (
+                  <div className={`bg-white rounded-lg shadow p-6 border-l-4 ${
+                    result.hipaaQuickCheck.riskLevel === 'HIGH' ? 'border-red-500' :
+                    result.hipaaQuickCheck.riskLevel === 'MEDIUM' ? 'border-yellow-500' : 'border-green-500'
+                  }`}>
+                    <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                      <ClipboardCheck className="h-5 w-5" />
+                      HIPAA Quick Check
+                    </h2>
+                    <p className="text-sm text-gray-700">{result.hipaaQuickCheck.message}</p>
                   </div>
                 )}
 
