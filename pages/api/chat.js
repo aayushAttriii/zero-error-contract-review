@@ -1,16 +1,19 @@
 /**
  * Contract Q&A Chatbot API Endpoint
  * Uses Azure OpenAI to answer questions about uploaded contracts
+ * Features: Retry logic, timeout handling, robust error handling
  */
 
 import OpenAI from 'openai';
 
-// Initialize Azure OpenAI client
+// Initialize Azure OpenAI client with timeout
 const client = new OpenAI({
   apiKey: process.env.AZURE_OPENAI_API_KEY,
   baseURL: `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}`,
   defaultQuery: { 'api-version': process.env.AZURE_OPENAI_API_VERSION || '2024-12-01-preview' },
   defaultHeaders: { 'api-key': process.env.AZURE_OPENAI_API_KEY },
+  timeout: 60000, // 60 second timeout
+  maxRetries: 3, // Built-in retry for transient errors
 });
 
 const SYSTEM_PROMPT = `You are an expert legal contract analyst assistant. Your role is to help users understand contracts by answering their questions clearly and accurately.
@@ -29,18 +32,123 @@ Format your responses with:
 - Supporting details or quotes from the contract
 - Any relevant warnings or considerations`;
 
+/**
+ * Retry wrapper with exponential backoff
+ */
+async function withRetry(fn, maxRetries = 3, baseDelay = 1000) {
+  let lastError;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // Don't retry on client errors (4xx) except 429 (rate limit)
+      if (error.status && error.status >= 400 && error.status < 500 && error.status !== 429) {
+        throw error;
+      }
+
+      // Calculate delay with exponential backoff + jitter
+      const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+
+      console.log(`Chat API attempt ${attempt + 1} failed, retrying in ${Math.round(delay)}ms...`);
+
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+/**
+ * Classify error type for better user feedback
+ */
+function classifyError(error) {
+  const message = error.message?.toLowerCase() || '';
+  const status = error.status || error.statusCode;
+
+  if (status === 429 || message.includes('rate limit')) {
+    return {
+      type: 'RATE_LIMIT',
+      userMessage: 'The service is currently busy. Please wait a moment and try again.',
+      retryable: true
+    };
+  }
+
+  if (status === 401 || status === 403 || message.includes('unauthorized') || message.includes('api key')) {
+    return {
+      type: 'AUTH_ERROR',
+      userMessage: 'Authentication error. Please check the API configuration.',
+      retryable: false
+    };
+  }
+
+  if (message.includes('timeout') || message.includes('timed out') || error.code === 'ETIMEDOUT') {
+    return {
+      type: 'TIMEOUT',
+      userMessage: 'The request timed out. Please try asking a shorter question or try again.',
+      retryable: true
+    };
+  }
+
+  if (message.includes('network') || message.includes('econnrefused') || message.includes('enotfound')) {
+    return {
+      type: 'NETWORK_ERROR',
+      userMessage: 'Network connection error. Please check your internet connection and try again.',
+      retryable: true
+    };
+  }
+
+  if (status >= 500 || message.includes('server error')) {
+    return {
+      type: 'SERVER_ERROR',
+      userMessage: 'The AI service is temporarily unavailable. Please try again in a moment.',
+      retryable: true
+    };
+  }
+
+  if (message.includes('content filter') || message.includes('content management')) {
+    return {
+      type: 'CONTENT_FILTER',
+      userMessage: 'Your question was filtered by content safety. Please rephrase your question.',
+      retryable: false
+    };
+  }
+
+  return {
+    type: 'UNKNOWN',
+    userMessage: 'An unexpected error occurred. Please try again.',
+    retryable: true
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const startTime = Date.now();
+
   try {
     const { question, contractText, chatHistory = [] } = req.body;
 
-    if (!question || !contractText) {
+    // Validate inputs
+    if (!question || typeof question !== 'string') {
       return res.status(400).json({
-        error: 'Missing required fields',
-        message: 'Both question and contractText are required'
+        error: 'Invalid question',
+        message: 'Please provide a valid question.',
+        retryable: false
+      });
+    }
+
+    if (!contractText || typeof contractText !== 'string') {
+      return res.status(400).json({
+        error: 'Missing contract',
+        message: 'No contract text available. Please upload a document first.',
+        retryable: false
       });
     }
 
@@ -48,51 +156,98 @@ export default async function handler(req, res) {
     if (!process.env.AZURE_OPENAI_API_KEY || !process.env.AZURE_OPENAI_ENDPOINT) {
       return res.status(503).json({
         error: 'AI not configured',
-        message: 'Azure OpenAI is not configured. Please set up environment variables.'
+        message: 'Azure OpenAI is not configured. Please set up environment variables.',
+        retryable: false
       });
     }
+
+    // Sanitize and limit contract text to avoid token limits
+    // Azure OpenAI has strict limits - keep contract under 6000 chars (~1500 tokens)
+    const maxContractLength = 6000;
+    const sanitizedContract = contractText.slice(0, maxContractLength);
 
     // Build messages array with chat history
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       {
         role: 'user',
-        content: `Here is the contract text to analyze:\n\n---CONTRACT START---\n${contractText.slice(0, 15000)}\n---CONTRACT END---\n\nPlease answer questions about this contract.`
+        content: `Here is the contract text to analyze:\n\n---CONTRACT START---\n${sanitizedContract}\n---CONTRACT END---\n\nPlease answer questions about this contract.`
       },
       { role: 'assistant', content: 'I\'ve reviewed the contract. What would you like to know about it?' }
     ];
 
-    // Add chat history (last 10 exchanges to manage context window)
-    const recentHistory = chatHistory.slice(-20);
+    // Add chat history (last 6 exchanges to manage context window)
+    const recentHistory = chatHistory.slice(-12);
     for (const msg of recentHistory) {
-      messages.push({
-        role: msg.role,
-        content: msg.content
-      });
+      if (msg.role && msg.content) {
+        messages.push({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: String(msg.content).slice(0, 500) // Limit individual message length
+        });
+      }
     }
 
     // Add current question
-    messages.push({ role: 'user', content: question });
+    messages.push({ role: 'user', content: question.slice(0, 500) });
 
-    const response = await client.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT,
-      messages,
-      max_completion_tokens: 1000,
-    });
+    // Make API call with retry
+    const response = await withRetry(async () => {
+      return await client.chat.completions.create({
+        model: process.env.AZURE_OPENAI_DEPLOYMENT,
+        messages,
+        max_completion_tokens: 2000,
+      });
+    }, 3, 1000);
 
-    const answer = response.choices[0].message.content;
+    // Validate response
+    if (!response.choices || !response.choices[0] || !response.choices[0].message) {
+      console.error('Invalid API response structure:', JSON.stringify(response, null, 2));
+      throw new Error('Invalid response from AI service');
+    }
+
+    let answer = response.choices[0].message.content;
+
+    // Handle empty or null responses
+    if (!answer || answer.trim().length === 0) {
+      // Check if there's a finish_reason that explains the empty response
+      const finishReason = response.choices[0].finish_reason;
+      console.warn('Empty response from AI. Finish reason:', finishReason);
+
+      if (finishReason === 'content_filter') {
+        answer = "I'm sorry, but I couldn't generate a response due to content filtering. Please try rephrasing your question.";
+      } else if (finishReason === 'length') {
+        answer = "The response was too long to complete. Please try asking a more specific question.";
+      } else {
+        // Provide a helpful fallback response
+        answer = "I apologize, but I couldn't generate a response for your question. This might be due to the complexity of the query or a temporary service issue. Please try:\n\n1. Asking a more specific question\n2. Breaking down complex questions into simpler parts\n3. Trying again in a moment";
+      }
+    }
+
+    const processingTime = Date.now() - startTime;
 
     return res.status(200).json({
       answer,
-      usage: response.usage
+      usage: response.usage,
+      processingTime,
+      retryable: false
     });
 
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error('Chat API error:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      type: error.type
+    });
 
-    return res.status(500).json({
-      error: 'Chat failed',
-      message: error.message
+    const errorInfo = classifyError(error);
+    const processingTime = Date.now() - startTime;
+
+    return res.status(error.status || 500).json({
+      error: errorInfo.type,
+      message: errorInfo.userMessage,
+      retryable: errorInfo.retryable,
+      processingTime
     });
   }
 }

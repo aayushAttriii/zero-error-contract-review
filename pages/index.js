@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart, Plus, Trash2, Eye, EyeOff, Columns, Info, MessageCircle, Send, Bot, User, Files } from 'lucide-react';
+import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart, Plus, Trash2, Eye, EyeOff, Columns, Info, MessageCircle, Send, Bot, User, Files, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -210,14 +210,31 @@ export default function Home() {
     }
   };
 
-  // Send chat message
-  const sendChatMessage = async (question) => {
+  // Send chat message with retry support
+  const sendChatMessage = async (question, isRetry = false) => {
     if (!question.trim() || !result?.originalText) return;
 
-    const userMessage = { role: 'user', content: question };
-    setChatMessages(prev => [...prev, userMessage]);
-    setChatInput('');
+    // If not a retry, add user message to chat
+    if (!isRetry) {
+      const userMessage = { role: 'user', content: question };
+      setChatMessages(prev => [...prev, userMessage]);
+      setChatInput('');
+    } else {
+      // Remove the last error message before retrying
+      setChatMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length > 0 && newMessages[newMessages.length - 1].isError) {
+          newMessages.pop();
+        }
+        return newMessages;
+      });
+    }
+
     setChatLoading(true);
+
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second client timeout
 
     try {
       const response = await fetch('/api/chat', {
@@ -226,9 +243,12 @@ export default function Home() {
         body: JSON.stringify({
           question,
           contractText: result.originalText,
-          chatHistory: chatMessages
-        })
+          chatHistory: chatMessages.filter(m => !m.isError) // Don't send error messages to API
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json();
 
@@ -239,11 +259,33 @@ export default function Home() {
       const assistantMessage = { role: 'assistant', content: data.answer };
       setChatMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
-      const errorMessage = { role: 'assistant', content: `Error: ${err.message}. Please try again.` };
-      setChatMessages(prev => [...prev, errorMessage]);
+      clearTimeout(timeoutId);
+
+      let errorMessage = err.message;
+      let retryable = true;
+
+      if (err.name === 'AbortError') {
+        errorMessage = 'Request timed out. Please try again.';
+      } else if (err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      }
+
+      const errorMsg = {
+        role: 'assistant',
+        content: errorMessage,
+        isError: true,
+        retryable,
+        originalQuestion: question
+      };
+      setChatMessages(prev => [...prev, errorMsg]);
     } finally {
       setChatLoading(false);
     }
+  };
+
+  // Retry last failed message
+  const retryChatMessage = (originalQuestion) => {
+    sendChatMessage(originalQuestion, true);
   };
 
   const handleChatSubmit = (e) => {
@@ -1032,18 +1074,34 @@ export default function Home() {
                   className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Bot className="h-4 w-4 text-blue-600" />
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full ${msg.isError ? 'bg-red-100' : 'bg-blue-100'} flex items-center justify-center`}>
+                      {msg.isError ? (
+                        <AlertCircle className="h-4 w-4 text-red-600" />
+                      ) : (
+                        <Bot className="h-4 w-4 text-blue-600" />
+                      )}
                     </div>
                   )}
                   <div
                     className={`max-w-[80%] p-3 rounded-lg text-sm ${
                       msg.role === 'user'
                         ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                        : msg.isError
+                          ? 'bg-red-50 text-red-700 border border-red-200 rounded-bl-none'
+                          : 'bg-gray-100 text-gray-800 rounded-bl-none'
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{msg.content}</p>
+                    {msg.isError && msg.retryable && (
+                      <button
+                        onClick={() => retryChatMessage(msg.originalQuestion)}
+                        disabled={chatLoading}
+                        className="mt-2 flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        Retry
+                      </button>
+                    )}
                   </div>
                   {msg.role === 'user' && (
                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
