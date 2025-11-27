@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart } from 'lucide-react';
+import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart, Plus, Trash2, Eye, EyeOff, Columns } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -17,6 +17,10 @@ export default function Home() {
     generateHIPAA: false,
     exportPDF: false
   });
+  const [customRules, setCustomRules] = useState([]);
+  const [newRule, setNewRule] = useState({ name: '', pattern: '', type: 'PII' });
+  const [showCustomRules, setShowCustomRules] = useState(false);
+  const [comparisonView, setComparisonView] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -44,7 +48,15 @@ export default function Home() {
         throw new Error('Please upload a file or enter text');
       }
 
-      formData.append('options', JSON.stringify(options));
+      formData.append('options', JSON.stringify({
+        ...options,
+        customPatterns: customRules.map(rule => ({
+          type: rule.name.toUpperCase().replace(/\s+/g, '_'),
+          regex: rule.pattern,
+          priority: 5,
+          confidence: 'medium'
+        }))
+      }));
 
       const response = await fetch('/api/review', {
         method: 'POST',
@@ -68,6 +80,23 @@ export default function Home() {
   const clearFile = () => {
     setFile(null);
     setResult(null);
+  };
+
+  const addCustomRule = () => {
+    if (newRule.name && newRule.pattern) {
+      try {
+        // Validate regex
+        new RegExp(newRule.pattern, 'gi');
+        setCustomRules([...customRules, { ...newRule, id: Date.now() }]);
+        setNewRule({ name: '', pattern: '', type: 'PII' });
+      } catch (e) {
+        setError('Invalid regex pattern: ' + e.message);
+      }
+    }
+  };
+
+  const removeCustomRule = (id) => {
+    setCustomRules(customRules.filter(rule => rule.id !== id));
   };
 
   const getSeverityColor = (severity) => {
@@ -243,8 +272,7 @@ export default function Home() {
                     <span className="font-medium">Enable AI Analysis</span>
                     <span className="text-xs text-gray-500">(Azure OpenAI)</span>
                   </label>
-                  <div className="grid grid-cols-2 gap-3 border-t pt-3 mt-3">
-                    <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-sm border-t pt-3 mt-3">
                       <input
                         type="checkbox"
                         checked={options.generateHIPAA}
@@ -252,19 +280,94 @@ export default function Home() {
                         className="rounded text-green-600"
                       />
                       <Heart className="h-4 w-4 text-green-600" />
-                      <span>HIPAA Report</span>
+                      <span>Generate HIPAA Report</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={options.exportPDF}
-                        onChange={(e) => setOptions({ ...options, exportPDF: e.target.checked })}
-                        className="rounded text-purple-600"
-                      />
-                      <Download className="h-4 w-4 text-purple-600" />
-                      <span>Export PDF</span>
-                    </label>
-                  </div>
+                </div>
+
+                {/* Custom Redaction Rules */}
+                <div className="border rounded-lg p-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomRules(!showCustomRules)}
+                    className="flex items-center gap-2 font-medium text-gray-700 w-full"
+                  >
+                    {showCustomRules ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    Custom Redaction Rules
+                    {customRules.length > 0 && (
+                      <span className="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
+                        {customRules.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {showCustomRules && (
+                    <div className="mt-3 space-y-3">
+                      <div className="grid grid-cols-1 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Rule name (e.g., Employee ID)"
+                          value={newRule.name}
+                          onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Regex pattern (e.g., EMP-\d{5})"
+                          value={newRule.pattern}
+                          onChange={(e) => setNewRule({ ...newRule, pattern: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <div className="flex gap-2">
+                          <select
+                            value={newRule.type}
+                            onChange={(e) => setNewRule({ ...newRule, type: e.target.value })}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="PII">PII (Personal Info)</option>
+                            <option value="PHI">PHI (Health Info)</option>
+                            <option value="Financial">Financial</option>
+                            <option value="Confidential">Confidential</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={addCustomRule}
+                            disabled={!newRule.name || !newRule.pattern}
+                            className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add
+                          </button>
+                        </div>
+                      </div>
+
+                      {customRules.length > 0 && (
+                        <div className="space-y-2 max-h-32 overflow-y-auto">
+                          {customRules.map(rule => (
+                            <div key={rule.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                              <div className="flex-1">
+                                <span className="font-medium">{rule.name}</span>
+                                <span className="text-gray-500 ml-2 font-mono text-xs">{rule.pattern}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs bg-gray-200 px-2 py-0.5 rounded">{rule.type}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeCustomRule(rule.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="text-xs text-gray-500">
+                        Add custom patterns to redact specific information unique to your organization.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Error Display */}
@@ -321,37 +424,96 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Download Buttons */}
-                  {(result.redactedPDF || result.hipaaReportPDF) && (
-                    <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
-                      {result.redactedPDF && (
-                        <button
-                          onClick={() => downloadPDF(result.redactedPDF, 'redacted-document.pdf')}
-                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-                        >
-                          <Download className="h-4 w-4" />
-                          Download Redacted PDF
-                        </button>
-                      )}
-                      {result.hipaaReportPDF && (
-                        <button
-                          onClick={() => downloadPDF(result.hipaaReportPDF, 'hipaa-compliance-report.pdf')}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                        >
-                          <ClipboardCheck className="h-4 w-4" />
-                          Download HIPAA Report
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  {/* Export Options & Download Buttons */}
+                  <div className="mt-4 pt-4 border-t">
+                    {/* PDF Export Toggle (if not already exported) */}
+                    {!result.redactedPDF && (
+                      <div className="mb-3 p-3 bg-purple-50 rounded-lg">
+                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={options.exportPDF}
+                            onChange={(e) => setOptions({ ...options, exportPDF: e.target.checked })}
+                            className="rounded text-purple-600"
+                          />
+                          <Download className="h-4 w-4 text-purple-600" />
+                          <span className="font-medium">Enable PDF Export</span>
+                          <span className="text-xs text-gray-500">(Re-run analysis to generate)</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Download Buttons */}
+                    {(result.redactedPDF || result.hipaaReportPDF) && (
+                      <div className="flex flex-wrap gap-2">
+                        {result.redactedPDF && (
+                          <button
+                            onClick={() => downloadPDF(result.redactedPDF, 'redacted-document.pdf')}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                          >
+                            <Download className="h-4 w-4" />
+                            Download Redacted PDF
+                          </button>
+                        )}
+                        {result.hipaaReportPDF && (
+                          <button
+                            onClick={() => downloadPDF(result.hipaaReportPDF, 'hipaa-compliance-report.pdf')}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                          >
+                            <ClipboardCheck className="h-4 w-4" />
+                            Download HIPAA Report
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Redacted Text */}
+                {/* Text View - Toggle Between Redacted and Comparison */}
                 <div className="bg-white rounded-lg shadow p-6">
-                  <h2 className="text-lg font-semibold mb-4">Redacted Text</h2>
-                  <div className="max-h-64 overflow-y-auto p-4 bg-gray-50 rounded-lg text-sm font-mono whitespace-pre-wrap">
-                    {result.redactedText || 'No text to display'}
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold">
+                      {comparisonView ? 'Before / After Comparison' : 'Redacted Text'}
+                    </h2>
+                    <button
+                      onClick={() => setComparisonView(!comparisonView)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                        comparisonView
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Columns className="h-4 w-4" />
+                      {comparisonView ? 'Show Redacted Only' : 'Compare Before/After'}
+                    </button>
                   </div>
+
+                  {comparisonView ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
+                          <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                          Original
+                        </h3>
+                        <div className="max-h-64 overflow-y-auto p-3 bg-red-50 border border-red-200 rounded-lg text-sm font-mono whitespace-pre-wrap">
+                          {result.originalText || 'No text to display'}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                          Redacted
+                        </h3>
+                        <div className="max-h-64 overflow-y-auto p-3 bg-green-50 border border-green-200 rounded-lg text-sm font-mono whitespace-pre-wrap">
+                          {result.redactedText || 'No text to display'}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto p-4 bg-gray-50 rounded-lg text-sm font-mono whitespace-pre-wrap">
+                      {result.redactedText || 'No text to display'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Redactions List */}

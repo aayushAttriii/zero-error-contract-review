@@ -65,7 +65,8 @@ export default async function handler(req, res) {
       useAI = false,
       generateHIPAA = false,
       exportPDF = false,
-      documentName = 'Untitled Document'
+      documentName = 'Untitled Document',
+      customPatterns = []
     } = options;
 
     let text = '';
@@ -118,9 +119,19 @@ export default async function handler(req, res) {
 
     // Perform redaction
     console.log('Starting redaction...');
+
+    // Transform custom patterns from frontend to regex format
+    const transformedCustomPatterns = customPatterns.map(p => ({
+      type: p.type,
+      regex: new RegExp(p.regex, 'gi'),
+      priority: p.priority || 5,
+      confidence: p.confidence || 'medium'
+    }));
+
     const redactionResult = redactText(text, {
       redactPII,
-      redactPHI
+      redactPHI,
+      customPatterns: transformedCustomPatterns
     });
 
     // Perform flagging
