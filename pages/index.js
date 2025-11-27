@@ -210,7 +210,7 @@ export default function Home() {
     }
   };
 
-  // Send chat message with retry support
+  // Send chat message with streaming support
   const sendChatMessage = async (question, isRetry = false) => {
     if (!question.trim() || !result?.originalText) return;
 
@@ -232,32 +232,93 @@ export default function Home() {
 
     setChatLoading(true);
 
+    // Add empty assistant message that will be populated with streaming content
+    const streamingMessageIndex = isRetry ? chatMessages.length - 1 : chatMessages.length;
+    setChatMessages(prev => [...prev, { role: 'assistant', content: '', isStreaming: true }]);
+
     // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second client timeout
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/chat-stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question,
           contractText: result.originalText,
-          chatHistory: chatMessages.filter(m => !m.isError) // Don't send error messages to API
+          chatHistory: chatMessages.filter(m => !m.isError && !m.isStreaming)
         }),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
 
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.message || 'Chat request failed');
       }
 
-      const assistantMessage = { role: 'assistant', content: data.answer };
-      setChatMessages(prev => [...prev, assistantMessage]);
+      // Read the stream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content) {
+                fullContent += parsed.content;
+                // Update the streaming message with new content
+                setChatMessages(prev => {
+                  const newMessages = [...prev];
+                  const lastIndex = newMessages.length - 1;
+                  if (lastIndex >= 0 && newMessages[lastIndex].isStreaming) {
+                    newMessages[lastIndex] = {
+                      ...newMessages[lastIndex],
+                      content: fullContent
+                    };
+                  }
+                  return newMessages;
+                });
+              }
+              if (parsed.error) {
+                throw new Error(parsed.message || 'Stream error');
+              }
+            } catch (e) {
+              // Ignore JSON parse errors for incomplete chunks
+              if (e.message !== 'Stream error') continue;
+              throw e;
+            }
+          }
+        }
+      }
+
+      // Mark streaming as complete
+      setChatMessages(prev => {
+        const newMessages = [...prev];
+        const lastIndex = newMessages.length - 1;
+        if (lastIndex >= 0 && newMessages[lastIndex].isStreaming) {
+          newMessages[lastIndex] = {
+            role: 'assistant',
+            content: fullContent || "I couldn't generate a response. Please try again.",
+            isStreaming: false
+          };
+        }
+        return newMessages;
+      });
+
     } catch (err) {
       clearTimeout(timeoutId);
 
@@ -270,14 +331,21 @@ export default function Home() {
         errorMessage = 'Network error. Please check your connection and try again.';
       }
 
-      const errorMsg = {
-        role: 'assistant',
-        content: errorMessage,
-        isError: true,
-        retryable,
-        originalQuestion: question
-      };
-      setChatMessages(prev => [...prev, errorMsg]);
+      // Replace streaming message with error
+      setChatMessages(prev => {
+        const newMessages = [...prev];
+        const lastIndex = newMessages.length - 1;
+        if (lastIndex >= 0) {
+          newMessages[lastIndex] = {
+            role: 'assistant',
+            content: errorMessage,
+            isError: true,
+            retryable,
+            originalQuestion: question
+          };
+        }
+        return newMessages;
+      });
     } finally {
       setChatLoading(false);
     }
