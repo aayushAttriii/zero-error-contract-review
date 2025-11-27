@@ -266,12 +266,171 @@ describe('Redaction Engine', () => {
         Card: 4111 1111 1111 1111
       `;
       const result = redactText(input);
-      
+
       expect(result.summary.email).toBe(1);
       expect(result.summary.phone).toBe(1);
       expect(result.summary.ssn).toBe(1);
       expect(result.summary.credit_card).toBe(1);
       expect(result.summary.totalRedactions).toBe(4);
+    });
+  });
+
+  describe('Salary Redaction', () => {
+    test('should redact salary with keyword', () => {
+      const input = 'Employee salary: $85,000 per year';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+    });
+
+    test('should redact compensation amounts', () => {
+      const input = 'Annual compensation $120,000.00 per annum';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+    });
+
+    test('should redact hourly rate', () => {
+      const input = 'Hourly rate: $45.50 per hour';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+    });
+
+    test('should redact base pay', () => {
+      const input = 'Base salary $95,000 annually';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+    });
+
+    test('should redact earnings statements', () => {
+      const input = 'The employee earns $150,000 in this role';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+    });
+  });
+
+  describe('Bank Account Redaction', () => {
+    test('should redact bank account with keyword', () => {
+      const input = 'Bank account number: 12345678901234';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'BANK_ACCOUNT')).toBe(true);
+    });
+
+    test('should redact account number with # symbol', () => {
+      const input = 'Account #: 9876543210';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'BANK_ACCOUNT')).toBe(true);
+    });
+
+    test('should not redact short numbers without context', () => {
+      const input = 'Order 12345 is ready';
+      const result = redactText(input);
+
+      expect(result.redactions.filter(r => r.type === 'BANK_ACCOUNT')).toHaveLength(0);
+    });
+  });
+
+  describe('Routing Number Redaction', () => {
+    test('should redact routing number with keyword', () => {
+      const input = 'Routing number: 021000021'; // Valid Chase routing number
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'ROUTING_NUMBER')).toBe(true);
+    });
+
+    test('should redact valid ABA routing number', () => {
+      const input = 'Wire to 121000248'; // Valid Wells Fargo routing number
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'ROUTING_NUMBER')).toBe(true);
+    });
+  });
+
+  describe('IBAN Redaction', () => {
+    test('should redact IBAN numbers', () => {
+      const input = 'Transfer to GB82WEST12345698765432';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'IBAN')).toBe(true);
+    });
+
+    test('should redact German IBAN', () => {
+      const input = 'IBAN: DE89370400440532013000';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'IBAN')).toBe(true);
+    });
+  });
+
+  describe('Medical Record Number (MRN) Redaction', () => {
+    test('should redact MRN with keyword', () => {
+      const input = 'Patient MRN: ABC123456';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+    });
+
+    test('should redact medical record number', () => {
+      const input = 'Medical record number: MR789012';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+    });
+
+    test('should redact patient ID', () => {
+      const input = 'Patient ID: PAT456789';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+    });
+  });
+
+  describe('HR Document Scenario', () => {
+    test('should redact all sensitive HR information', () => {
+      const input = `
+        EMPLOYEE RECORD
+        Name: Mr. John Smith
+        SSN: 123-45-6789
+        Email: john.smith@company.com
+        Salary: $95,000 per year
+        Bank Account: 12345678901234
+        Routing Number: 021000021
+      `;
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'TITLE_NAME')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'SSN')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'EMAIL')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'SALARY')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'BANK_ACCOUNT')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'ROUTING_NUMBER')).toBe(true);
+    });
+  });
+
+  describe('Healthcare Document Scenario', () => {
+    test('should redact all PHI from medical documents', () => {
+      const input = `
+        PATIENT INFORMATION
+        Name: Dr. Jane Doe
+        MRN: PAT789012
+        DOB: 05/15/1985
+        Phone: (555) 123-4567
+        Email: jane.doe@email.com
+        SSN: 987-65-4321
+      `;
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'TITLE_NAME')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'DATE')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'PHONE')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'EMAIL')).toBe(true);
+      expect(result.redactions.some(r => r.type === 'SSN')).toBe(true);
     });
   });
 });
