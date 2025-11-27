@@ -1,0 +1,145 @@
+SOFTWARE LICENSE AGREEMENT
+
+License ID: SLA-2024-ENT-00456
+Issue Date: April 5, 2024
+
+LICENSOR:
+CloudSoft Technologies, Inc.
+8000 Enterprise Way, Seattle, WA 98101
+Contact: Mr. Kevin O'Brien, VP of Sales
+Email: kevin.obrien@cloudsoft.io
+Phone: +1 (206) 555-3456
+Federal Tax ID: 91-2345678
+
+LICENSEE:
+Acme Corporation
+1500 Industrial Parkway, Detroit, MI 48201
+Contact: Ms. Jennifer Martinez, IT Director
+Email: j.martinez@acmecorp.com
+Phone: (313) 555-6789
+Tax ID: 38-9876543
+
+LICENSED SOFTWARE:
+Product Name: CloudSoft Enterprise Suite v5.0
+Modules Included:
+- Customer Relationship Management (CRM)
+- Enterprise Resource Planning (ERP)
+- Human Resources Information System (HRIS)
+- Business Intelligence Dashboard
+
+LICENSE TYPE: Enterprise Perpetual License
+NUMBER OF USERS: Unlimited (site license)
+
+1. GRANT OF LICENSE
+Subject to the terms of this Agreement, Licensor grants Licensee a non-exclusive, non-transferable license to use the Software for internal business purposes.
+
+2. LICENSE FEES AND PAYMENT
+
+Initial License Fee: $750,000.00
+Annual Maintenance Fee: $150,000.00 (20% of license fee)
+Implementation Services: $200,000.00
+Training (40 hours): $25,000.00
+
+TOTAL FIRST YEAR: $1,125,000.00
+
+Payment Schedule:
+- 50% upon signing: $562,500.00 (Due: April 15, 2024)
+- 25% upon delivery: $281,250.00 (Due: May 15, 2024)
+- 25% upon go-live: $281,250.00 (Due: July 15, 2024)
+
+Wire Transfer Details:
+Bank: Silicon Valley Bank
+Account Name: CloudSoft Technologies Inc.
+Account Number: 3456789012
+Routing Number: 121140399
+SWIFT Code: SVBKUS6S
+
+3. INTELLECTUAL PROPERTY
+All intellectual property rights in the Software remain with Licensor. Licensee acquires no ownership rights under this Agreement.
+
+4. RESTRICTIONS
+Licensee shall NOT:
+- Reverse engineer, decompile, or disassemble the Software
+- Sublicense, rent, or lease the Software to third parties
+- Remove or alter any proprietary notices
+- Use the Software to develop competing products
+
+5. CONFIDENTIALITY
+Both parties agree to maintain the confidentiality of proprietary information disclosed under this Agreement, including but not limited to:
+- Source code and algorithms
+- Pricing and financial terms
+- Customer data and business processes
+- Trade secrets and technical documentation
+
+6. DATA PROTECTION
+Licensee acknowledges that the Software may process personal data. Licensee agrees to:
+- Comply with GDPR, CCPA, and applicable data protection laws
+- Implement appropriate security measures
+- Report any data breaches within 72 hours
+
+7. WARRANTIES
+Licensor warrants that:
+- The Software will perform substantially as described in documentation
+- The Software does not infringe any third-party intellectual property rights
+- Maintenance services will be provided with reasonable skill and care
+
+WARRANTY PERIOD: 12 months from delivery date
+
+8. LIMITATION OF LIABILITY
+IN NO EVENT SHALL LICENSOR'S TOTAL LIABILITY EXCEED THE LICENSE FEES PAID BY LICENSEE IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
+
+LICENSOR SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, LOST DATA, OR BUSINESS INTERRUPTION.
+
+9. INDEMNIFICATION
+Licensor shall indemnify Licensee against claims that the Software infringes any patent, copyright, or trade secret, provided Licensee promptly notifies Licensor and cooperates in the defense.
+
+10. TERMINATION
+Either party may terminate this Agreement:
+- For material breach, with 30 days written notice and opportunity to cure
+- For insolvency or bankruptcy of the other party
+- By Licensor, if Licensee fails to pay fees within 60 days of due date
+
+Upon termination, Licensee shall cease all use of the Software and destroy all copies.
+
+11. AUDIT RIGHTS
+Licensor may audit Licensee's use of the Software upon 30 days written notice, no more than once per year. Audits shall be conducted during normal business hours.
+
+12. EXPORT COMPLIANCE
+Licensee agrees to comply with all applicable export control laws and regulations.
+
+13. GOVERNING LAW
+This Agreement shall be governed by the laws of the State of Washington.
+
+14. DISPUTE RESOLUTION
+Any disputes shall be resolved by binding arbitration in Seattle, Washington, under the rules of the American Arbitration Association.
+
+PRIVILEGED & CONFIDENTIAL - PREPARED BY LEGAL COUNSEL
+This agreement was prepared by Wilson & Partners LLP on behalf of CloudSoft Technologies. Communications with legal counsel regarding this agreement are protected by attorney-client privilege.
+
+AUTHORIZED SIGNATURES:
+
+For CloudSoft Technologies, Inc.:
+
+_______________________________
+Kevin O'Brien
+VP of Sales
+Date: April 5, 2024
+
+For Acme Corporation:
+
+_______________________________
+Jennifer Martinez
+IT Director
+Date: April 5, 2024
+
+_______________________________
+Thomas Anderson, CFO
+(Financial Authorization)
+Date: April 5, 2024
+
+EXHIBIT A: Licensed User Administrator
+Name: Sarah Chen
+Employee ID: ACM-2019-0456
+Email: s.chen@acmecorp.com
+Phone: (313) 555-7890
+SSN (for background check): 456-78-9012

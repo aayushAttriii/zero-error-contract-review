@@ -1,0 +1,116 @@
+HEALTHCARE SERVICES AGREEMENT
+
+Agreement Number: HSA-2024-00892
+Effective Date: February 20, 2024
+
+PARTIES:
+
+HEALTHCARE PROVIDER:
+MedCare Health Systems
+2500 Hospital Drive, Chicago, IL 60601
+NPI: 1234567890
+Tax ID: 36-1234567
+Contact: Dr. Elizabeth Warren, Medical Director
+Email: e.warren@medcare.org
+Phone: (312) 555-7890
+
+PATIENT/CLIENT:
+Name: Robert James Thompson
+Date of Birth: 05/15/1978
+SSN: 987-65-4321
+Address: 789 Oak Avenue, Apartment 12C, Chicago, IL 60614
+Phone: (312) 555-2468
+Email: robert.thompson@gmail.com
+Emergency Contact: Susan Thompson (Sister) - (312) 555-1357
+
+INSURANCE INFORMATION:
+Provider: BlueCross BlueShield of Illinois
+Policy Number: BCBS-IL-2024-456789
+Group Number: GRP-12345
+Member ID: MEM-9876543210
+
+MEDICAL INFORMATION (PROTECTED HEALTH INFORMATION - PHI):
+
+Primary Diagnosis: Type 2 Diabetes Mellitus (ICD-10: E11.9)
+Secondary Conditions:
+- Hypertension (ICD-10: I10)
+- Hyperlipidemia (ICD-10: E78.5)
+
+Current Medications:
+- Metformin 1000mg twice daily
+- Lisinopril 10mg once daily
+- Atorvastatin 20mg at bedtime
+
+Allergies: Sulfa drugs, Codeine
+Blood Type: A+
+Height: 5'11" | Weight: 195 lbs
+
+Recent Lab Results (01/15/2024):
+- HbA1c: 7.2%
+- Fasting Glucose: 142 mg/dL
+- Total Cholesterol: 198 mg/dL
+- Blood Pressure: 138/88 mmHg
+
+SERVICES TO BE PROVIDED:
+
+1. Chronic Disease Management Program
+   - Monthly physician consultations
+   - Quarterly lab work and monitoring
+   - Diabetes education and nutrition counseling
+   - Medication management
+
+2. Telehealth Services
+   - 24/7 nurse hotline access
+   - Virtual consultations as needed
+
+FINANCIAL TERMS:
+
+Monthly Program Fee: $450.00
+Insurance Copay: $50.00 per visit
+Deductible Remaining: $1,200.00
+
+Payment Method on File:
+Credit Card: 5412-7534-8901-2345
+Expiration: 08/2027
+CVV: [On file]
+Cardholder: Robert J. Thompson
+
+HIPAA AUTHORIZATION:
+
+The Patient hereby authorizes MedCare Health Systems to:
+- Access and maintain electronic health records
+- Share medical information with insurance providers
+- Communicate via email and text regarding appointments and results
+- Release medical records to referring physicians
+
+CONSENT FOR TREATMENT:
+
+I, Robert James Thompson, hereby consent to receive medical treatment and services from MedCare Health Systems. I understand the risks, benefits, and alternatives to the proposed treatments.
+
+ATTORNEY-CLIENT PRIVILEGE NOTICE:
+Communications between MedCare Health Systems and its legal counsel at HealthLaw Partners LLP regarding this agreement and patient matters are protected by attorney-client privilege and are strictly confidential.
+
+LIMITATION OF LIABILITY:
+
+MedCare Health Systems' liability for any claims arising from services provided under this Agreement shall not exceed the total fees paid by Patient during the twelve (12) months preceding such claim.
+
+ARBITRATION CLAUSE:
+
+Any disputes arising from this Agreement shall be resolved through binding arbitration in Cook County, Illinois. PATIENT WAIVES THE RIGHT TO A JURY TRIAL AND TO PARTICIPATE IN CLASS ACTION LAWSUITS.
+
+SIGNATURES:
+
+Patient Signature: _______________________
+Robert James Thompson
+Date: 02/20/2024
+
+Provider Signature: _______________________
+Dr. Elizabeth Warren, MD
+Medical Director, MedCare Health Systems
+Date: 02/20/2024
+
+Witness: Jennifer Martinez, RN
+Date: 02/20/2024
+
+PROVIDER NOTES (CONFIDENTIAL):
+Patient shows good compliance with medication regimen. Recommend continued monitoring of glucose levels. Social history: married, two children, works as accountant at Smith & Associates (employer phone: 312-555-8900). Previous provider: Dr. Michael Chen at Northwestern Medicine.

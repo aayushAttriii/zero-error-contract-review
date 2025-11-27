@@ -1,0 +1,87 @@
+NON-DISCLOSURE AGREEMENT (NDA)
+
+Effective Date: March 1, 2024
+
+BETWEEN:
+
+DISCLOSING PARTY:
+Quantum Innovations LLC
+1000 Tech Boulevard, Austin, TX 78701
+Contact: Ms. Patricia Anderson, Chief Legal Officer
+Email: p.anderson@quantuminnovations.com
+Phone: +1 (512) 555-9876
+
+AND
+
+RECEIVING PARTY:
+Global Consulting Partners Inc.
+555 Business Center Way, New York, NY 10001
+Contact: Mr. David Lee, Managing Director
+Email: david.lee@globalconsulting.com
+Phone: (212) 555-4321
+Tax ID: 98-7654321
+
+RECITALS:
+WHEREAS, the Disclosing Party possesses certain confidential and proprietary information relating to artificial intelligence algorithms, machine learning models, and quantum computing applications;
+
+WHEREAS, the Receiving Party desires to receive such information for the purpose of evaluating a potential business partnership;
+
+NOW, THEREFORE, the parties agree as follows:
+
+1. DEFINITION OF CONFIDENTIAL INFORMATION
+"Confidential Information" includes but is not limited to:
+- Technical specifications and source code
+- Customer lists and contact information
+- Financial projections and revenue data
+- Trade secrets and patent applications
+- Employee salary information and personnel records
+
+2. OBLIGATIONS OF RECEIVING PARTY
+The Receiving Party agrees to:
+a) Hold all Confidential Information in strict confidence
+b) Not disclose any Confidential Information to third parties
+c) Use the Confidential Information solely for the Purpose stated herein
+d) Return or destroy all Confidential Information upon request
+
+3. EXCLUSIONS
+This Agreement does not apply to information that:
+- Is or becomes publicly available through no fault of the Receiving Party
+- Was lawfully in the Receiving Party's possession prior to disclosure
+- Is independently developed by the Receiving Party
+
+4. TERM
+This Agreement shall remain in effect for a period of five (5) years from the Effective Date.
+
+5. INDEMNIFICATION
+The Receiving Party shall indemnify, defend, and hold harmless the Disclosing Party from any and all claims, damages, losses, and expenses arising from unauthorized disclosure of Confidential Information. THIS INDEMNIFICATION SHALL BE UNLIMITED IN SCOPE AND SHALL SURVIVE TERMINATION OF THIS AGREEMENT.
+
+6. REMEDIES
+The parties acknowledge that monetary damages may be inadequate for breach of this Agreement. The Disclosing Party shall be entitled to seek injunctive relief without posting bond.
+
+7. WARRANTY DISCLAIMER
+THE DISCLOSING PARTY MAKES NO WARRANTIES, EXPRESS OR IMPLIED, REGARDING THE ACCURACY OR COMPLETENESS OF THE CONFIDENTIAL INFORMATION. THE DISCLOSING PARTY DISCLAIMS ALL LIABILITY FOR ANY DAMAGES ARISING FROM USE OF THE CONFIDENTIAL INFORMATION.
+
+PRIVILEGED AND CONFIDENTIAL - ATTORNEY WORK PRODUCT
+This document was prepared under the supervision of legal counsel and contains attorney work product. Do not distribute without authorization from the Legal Department.
+
+8. GOVERNING LAW
+This Agreement shall be governed by the laws of the State of Delaware.
+
+AUTHORIZED SIGNATURES:
+
+For Quantum Innovations LLC:
+Name: Patricia Anderson
+Title: Chief Legal Officer
+Date: 03/01/2024
+IP Address at Signing: 192.168.1.105
+
+For Global Consulting Partners Inc.:
+Name: David Lee
+Title: Managing Director
+Date: 03/01/2024
+
+Wire Transfer Instructions for Partnership Fee:
+Bank: Chase Manhattan
+Account: 1234567890123456
+SWIFT: CHASUS33
+Amount Due: $50,000.00

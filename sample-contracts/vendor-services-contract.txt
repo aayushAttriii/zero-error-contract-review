@@ -1,0 +1,204 @@
+VENDOR SERVICES CONTRACT
+
+Contract Number: VSC-2024-03891
+Effective Date: May 1, 2024
+Expiration Date: April 30, 2025
+
+PARTIES TO THIS AGREEMENT:
+
+CLIENT:
+Riverside Manufacturing Co.
+4200 Factory Road, Cleveland, OH 44101
+Contact: Mr. William Foster, Procurement Director
+Email: w.foster@riversidemanufacturing.com
+Phone: (216) 555-1234
+Fax: (216) 555-1235
+EIN: 34-5678901
+
+VENDOR:
+Premier Logistics Solutions LLC
+9800 Distribution Center Blvd, Columbus, OH 43201
+Contact: Ms. Angela Davis, Account Manager
+Email: a.davis@premierlogistics.com
+Phone: (614) 555-9012
+Mobile: (614) 555-9013
+Tax ID: 31-2345678
+DUNS Number: 123456789
+
+SCOPE OF SERVICES:
+
+Premier Logistics Solutions shall provide the following services to Riverside Manufacturing:
+
+1. Warehousing and Distribution
+   - 50,000 sq ft dedicated warehouse space
+   - Climate-controlled storage for sensitive materials
+   - 24/7 security monitoring
+   - Inventory management system access
+
+2. Transportation Services
+   - Daily pickup from manufacturing facility
+   - Regional delivery (OH, MI, IN, PA, WV)
+   - LTL and FTL shipping coordination
+   - Real-time shipment tracking
+
+3. Value-Added Services
+   - Kitting and assembly
+   - Packaging and labeling
+   - Returns processing
+   - Quality inspection
+
+SERVICE LEVELS AND METRICS:
+
+| Metric                    | Target  | Penalty for Non-Compliance |
+|---------------------------|---------|----------------------------|
+| On-Time Delivery          | 98%     | 2% credit per 1% below     |
+| Order Accuracy            | 99.5%   | $500 per error             |
+| Inventory Accuracy        | 99.9%   | $1,000 per discrepancy     |
+| Damage Rate               | <0.5%   | Full replacement cost      |
+
+PRICING AND PAYMENT TERMS:
+
+Monthly Base Fee: $45,000.00
+Per-Pallet Storage: $8.50/pallet/month
+Outbound Shipping: Cost + 15% handling fee
+Value-Added Services: Per quote
+
+Estimated Annual Contract Value: $750,000.00
+
+Payment Terms: Net 30 days
+Late Payment Fee: 1.5% per month
+
+BILLING CONTACT:
+Name: Patricia Wong
+Title: Accounts Payable Manager
+Email: p.wong@riversidemanufacturing.com
+Phone: (216) 555-1240
+
+PAYMENT METHOD:
+ACH Transfer
+Bank: KeyBank
+Account Number: 789012345678
+Routing Number: 041001039
+
+INSURANCE REQUIREMENTS:
+
+Vendor shall maintain the following insurance coverage:
+- General Liability: $2,000,000 per occurrence
+- Auto Liability: $1,000,000 combined single limit
+- Workers' Compensation: Statutory limits
+- Cargo Insurance: $500,000 per shipment
+- Umbrella/Excess: $5,000,000
+
+Certificate Holder:
+Riverside Manufacturing Co.
+4200 Factory Road
+Cleveland, OH 44101
+
+CONFIDENTIALITY AND DATA PROTECTION:
+
+Both parties agree to protect confidential information including:
+- Pricing and contract terms
+- Customer lists and shipping data
+- Inventory levels and product specifications
+- Financial information and forecasts
+
+Vendor acknowledges access to the following data:
+- Customer names and addresses
+- Order history and preferences
+- Product SKUs and descriptions
+
+COMPLIANCE REQUIREMENTS:
+
+Vendor certifies compliance with:
+- OSHA workplace safety standards
+- DOT transportation regulations
+- EPA environmental regulations
+- C-TPAT security requirements
+
+INDEMNIFICATION:
+
+Vendor shall indemnify, defend, and hold harmless Client from any claims arising from:
+- Vendor's negligence or willful misconduct
+- Damage to goods while in Vendor's possession
+- Injuries to Vendor's employees
+- Violation of applicable laws
+
+CLIENT SHALL NOT BE LIABLE FOR ANY CONSEQUENTIAL, INCIDENTAL, OR PUNITIVE DAMAGES UNDER ANY CIRCUMSTANCES.
+
+TERMINATION:
+
+Either party may terminate this Agreement:
+- Without cause: 90 days written notice
+- For cause: 30 days written notice with opportunity to cure
+- Immediately: For material breach, bankruptcy, or illegal activity
+
+FORCE MAJEURE:
+
+Neither party shall be liable for delays due to events beyond reasonable control, including natural disasters, war, government actions, or pandemics.
+
+KEY PERSONNEL:
+
+Client Operations Contact:
+Name: Michael Torres
+Title: Warehouse Manager
+Email: m.torres@riversidemanufacturing.com
+Phone: (216) 555-1250
+Cell: (216) 555-8901
+SSN (for facility access): 234-56-7890
+
+Vendor Operations Contact:
+Name: James Wilson
+Title: Operations Supervisor
+Email: j.wilson@premierlogistics.com
+Phone: (614) 555-9020
+Cell: (614) 555-9021
+
+ATTORNEY-CLIENT PRIVILEGED:
+This contract was reviewed and approved by Henderson Law Group on behalf of Riverside Manufacturing. All communications regarding contract interpretation or disputes should be directed to legal counsel.
+
+GOVERNING LAW:
+This Agreement shall be governed by the laws of the State of Ohio.
+
+DISPUTE RESOLUTION:
+Disputes shall first be addressed through good-faith negotiation. If unresolved within 30 days, parties agree to non-binding mediation before pursuing litigation.
+
+ENTIRE AGREEMENT:
+This Agreement constitutes the entire understanding between the parties and supersedes all prior negotiations, representations, and agreements.
+
+SIGNATURES:
+
+FOR RIVERSIDE MANUFACTURING CO.:
+
+_________________________________
+William Foster
+Procurement Director
+Date: May 1, 2024
+
+_________________________________
+Richard Chen, CEO
+(Executive Approval)
+Date: May 1, 2024
+
+FOR PREMIER LOGISTICS SOLUTIONS LLC:
+
+_________________________________
+Angela Davis
+Account Manager
+Date: May 1, 2024
+
+_________________________________
+Steven Park, President
+Date: May 1, 2024
+
+EXHIBIT B - EMERGENCY CONTACTS:
+
+24/7 Operations Hotline: (614) 555-0000
+After-Hours Security: (614) 555-0001
+IT Support: (614) 555-0002
+
+Client Emergency Contact:
+Name: Robert Kim
+Title: VP Operations
+Cell: (216) 555-9999
+Home: (216) 555-8888
+Personal Email: r.kim.personal@gmail.com
