@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart, Plus, Trash2, Eye, EyeOff, Columns, Info, MessageCircle, Send, Bot, User } from 'lucide-react';
+import Link from 'next/link';
+import { Upload, FileText, Shield, AlertTriangle, CheckCircle, Loader2, X, Download, ClipboardCheck, Heart, Plus, Trash2, Eye, EyeOff, Columns, Info, MessageCircle, Send, Bot, User, Files } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -261,12 +262,21 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Contract Review Agent</h1>
-              <p className="text-sm text-gray-500">AI-Powered Analysis with PII/PHI Redaction</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Shield className="h-8 w-8 text-blue-600" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Contract Review Agent</h1>
+                <p className="text-sm text-gray-500">AI-Powered Analysis with PII/PHI Redaction</p>
+              </div>
             </div>
+            <Link
+              href="/batch"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Files className="h-5 w-5" />
+              Batch Processing
+            </Link>
           </div>
         </div>
       </header>
