@@ -388,6 +388,98 @@ describe('Redaction Engine', () => {
 
       expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
     });
+
+    test('should redact chart number', () => {
+      const input = 'Chart number: CH-123456';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+    });
+
+    test('should redact encounter ID', () => {
+      const input = 'Encounter ID: ENC789012';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MRN')).toBe(true);
+    });
+  });
+
+  describe('Health Insurance ID Redaction', () => {
+    test('should redact member ID', () => {
+      const input = 'Member ID: XYZ123456789';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'HEALTH_INSURANCE_ID')).toBe(true);
+    });
+
+    test('should redact subscriber ID', () => {
+      const input = 'Subscriber ID: SUB-987654321';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'HEALTH_INSURANCE_ID')).toBe(true);
+    });
+
+    test('should redact policy number', () => {
+      const input = 'Policy number: POL123456789';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'HEALTH_INSURANCE_ID')).toBe(true);
+    });
+
+    test('should redact group number', () => {
+      const input = 'Group number: GRP-456789';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'HEALTH_INSURANCE_ID')).toBe(true);
+    });
+  });
+
+  describe('Medicare/Medicaid ID Redaction', () => {
+    test('should redact Medicare ID', () => {
+      const input = 'Medicare ID: 1EG4-TE5-MK72';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MEDICARE_ID')).toBe(true);
+    });
+
+    test('should redact Medicaid number', () => {
+      const input = 'Medicaid number: 12345678901';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MEDICARE_ID')).toBe(true);
+    });
+
+    test('should redact MBI', () => {
+      const input = 'MBI: 1EG4TE5MK72';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'MEDICARE_ID')).toBe(true);
+    });
+  });
+
+  describe('DEA Number Redaction', () => {
+    test('should redact DEA number', () => {
+      const input = 'DEA Number: AB1234567';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'DEA_NUMBER')).toBe(true);
+    });
+  });
+
+  describe('NPI Redaction', () => {
+    test('should redact NPI number', () => {
+      const input = 'NPI: 1234567890';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'NPI')).toBe(true);
+    });
+
+    test('should redact National Provider Identifier', () => {
+      const input = 'National Provider Identifier: 9876543210';
+      const result = redactText(input);
+
+      expect(result.redactions.some(r => r.type === 'NPI')).toBe(true);
+    });
   });
 
   describe('HR Document Scenario', () => {

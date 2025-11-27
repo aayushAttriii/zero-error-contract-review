@@ -9,6 +9,8 @@ import { redactText } from '../../lib/redact';
 import { flagSensitiveContent } from '../../lib/flagging';
 import { performFullAnalysis } from '../../lib/aiAnalyzer';
 import { extractText, validateExtractedText, cleanExtractedText } from '../../lib/pdfExtractor';
+import { generateHIPAAReport, generateHIPAAReportText, quickHIPAACheck } from '../../lib/hipaaReport';
+import { generateRedactedPDF, generateHIPAAReportPDF } from '../../lib/pdfExport';
 
 // Disable body parser for file uploads
 export const config = {
@@ -60,7 +62,10 @@ export default async function handler(req, res) {
       redactPHI = true,
       flagPrivilege = true,
       flagConfidentiality = true,
-      useAI = false
+      useAI = false,
+      generateHIPAA = false,
+      exportPDF = false,
+      documentName = 'Untitled Document'
     } = options;
 
     let text = '';
@@ -147,7 +152,7 @@ export default async function handler(req, res) {
       try {
         console.log('Starting AI analysis...');
         const aiStartTime = Date.now();
-        
+
         const aiAnalysis = await performFullAnalysis(text, {
           includeEntities: true,
           includeObligations: true,
@@ -165,6 +170,68 @@ export default async function handler(req, res) {
         response.aiAnalysis = {
           error: 'AI analysis failed',
           message: aiError.message
+        };
+      }
+    }
+
+    // Generate HIPAA Compliance Report if requested
+    if (generateHIPAA) {
+      try {
+        console.log('Generating HIPAA compliance report...');
+        const hipaaReport = generateHIPAAReport(
+          text,
+          redactionResult.redactions,
+          flaggingResult.flags,
+          {
+            documentName: extractionMetadata?.filename || documentName,
+            documentType: 'Healthcare Document',
+            includeFullDetails: true
+          }
+        );
+
+        response.hipaaReport = hipaaReport;
+        response.hipaaReportText = generateHIPAAReportText(hipaaReport);
+        response.hipaaQuickCheck = quickHIPAACheck(
+          redactionResult.redactions,
+          flaggingResult.flags
+        );
+      } catch (hipaaError) {
+        console.error('HIPAA report generation failed:', hipaaError);
+        response.hipaaReport = {
+          error: 'HIPAA report generation failed',
+          message: hipaaError.message
+        };
+      }
+    }
+
+    // Generate PDF exports if requested
+    if (exportPDF) {
+      try {
+        console.log('Generating PDF exports...');
+
+        // Generate redacted document PDF
+        const redactedPDF = await generateRedactedPDF({
+          originalText: text,
+          redactedText: redactionResult.redactedText,
+          redactions: redactionResult.redactions,
+          flags: flaggingResult.flags,
+          documentName: extractionMetadata?.filename || documentName,
+          includeOriginal: false,
+          includeMetadata: true
+        });
+
+        response.redactedPDF = redactedPDF.toString('base64');
+
+        // Generate HIPAA report PDF if HIPAA report was generated
+        if (response.hipaaReport && !response.hipaaReport.error) {
+          const hipaaReportPDF = await generateHIPAAReportPDF(response.hipaaReport);
+          response.hipaaReportPDF = hipaaReportPDF.toString('base64');
+        }
+      } catch (pdfError) {
+        console.error('PDF generation failed:', pdfError);
+        response.pdfExport = {
+          error: 'PDF generation failed',
+          message: pdfError.message
         };
       }
     }
