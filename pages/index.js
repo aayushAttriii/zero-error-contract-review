@@ -322,30 +322,68 @@ export default function Home() {
     } catch (err) {
       clearTimeout(timeoutId);
 
-      let errorMessage = err.message;
-      let retryable = true;
+      // If streaming failed, try the non-streaming fallback
+      console.log('Streaming failed, trying fallback:', err.message);
 
-      if (err.name === 'AbortError') {
-        errorMessage = 'Request timed out. Please try again.';
-      } else if (err.message.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection and try again.';
-      }
+      try {
+        const fallbackResponse = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question,
+            contractText: result.originalText,
+            chatHistory: chatMessages.filter(m => !m.isError && !m.isStreaming)
+          })
+        });
 
-      // Replace streaming message with error
-      setChatMessages(prev => {
-        const newMessages = [...prev];
-        const lastIndex = newMessages.length - 1;
-        if (lastIndex >= 0) {
-          newMessages[lastIndex] = {
-            role: 'assistant',
-            content: errorMessage,
-            isError: true,
-            retryable,
-            originalQuestion: question
-          };
+        const fallbackData = await fallbackResponse.json();
+
+        if (fallbackResponse.ok && fallbackData.answer) {
+          // Success with fallback - update the message
+          setChatMessages(prev => {
+            const newMessages = [...prev];
+            const lastIndex = newMessages.length - 1;
+            if (lastIndex >= 0) {
+              newMessages[lastIndex] = {
+                role: 'assistant',
+                content: fallbackData.answer,
+                isStreaming: false
+              };
+            }
+            return newMessages;
+          });
+          setChatLoading(false);
+          return;
         }
-        return newMessages;
-      });
+
+        // Fallback also failed
+        throw new Error(fallbackData.message || 'Chat request failed');
+      } catch (fallbackErr) {
+        let errorMessage = fallbackErr.message || err.message;
+        let retryable = true;
+
+        if (err.name === 'AbortError') {
+          errorMessage = 'Request timed out. Please try again.';
+        } else if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+
+        // Replace streaming message with error
+        setChatMessages(prev => {
+          const newMessages = [...prev];
+          const lastIndex = newMessages.length - 1;
+          if (lastIndex >= 0) {
+            newMessages[lastIndex] = {
+              role: 'assistant',
+              content: errorMessage,
+              isError: true,
+              retryable,
+              originalQuestion: question
+            };
+          }
+          return newMessages;
+        });
+      }
     } finally {
       setChatLoading(false);
     }

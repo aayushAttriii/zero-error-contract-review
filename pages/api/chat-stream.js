@@ -34,6 +34,8 @@ export const config = {
   api: {
     bodyParser: true,
   },
+  // Vercel serverless function config for streaming
+  maxDuration: 60,
 };
 
 export default async function handler(req, res) {
@@ -127,18 +129,36 @@ export default async function handler(req, res) {
     res.end();
 
   } catch (error) {
-    console.error('Streaming chat error:', error);
+    console.error('Streaming chat error:', {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      type: error.type,
+      cause: error.cause
+    });
+
+    // Classify the error for better user feedback
+    let userMessage = 'An error occurred while processing your request.';
+    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+      userMessage = 'The request timed out. Please try again.';
+    } else if (error.message?.includes('rate limit') || error.status === 429) {
+      userMessage = 'Service is busy. Please wait a moment and try again.';
+    } else if (error.status === 401 || error.status === 403) {
+      userMessage = 'Authentication error. Please check API configuration.';
+    } else if (error.message?.includes('ECONNREFUSED') || error.message?.includes('ENOTFOUND')) {
+      userMessage = 'Connection error. Unable to reach the AI service.';
+    }
 
     // If headers haven't been sent, send JSON error
     if (!res.headersSent) {
       return res.status(500).json({
         error: 'Stream failed',
-        message: error.message
+        message: userMessage
       });
     }
 
     // If streaming already started, send error as SSE
-    res.write(`data: ${JSON.stringify({ error: true, message: error.message })}\n\n`);
+    res.write(`data: ${JSON.stringify({ error: true, message: userMessage })}\n\n`);
     res.end();
   }
 }
